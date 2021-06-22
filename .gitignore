@@ -1,0 +1,6 @@
+/logs
+.env
+.DS_Store
+ssl
+
+/minio/data

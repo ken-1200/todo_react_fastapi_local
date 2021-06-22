@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+  api:
+    container_name: FastAPI
+    build:
+      context: __fastapi__
+      dockerfile: ./Dockerfile
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - $SRC_FASTAPI:/server:cached
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  db:
+    container_name: DB
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=Asia/Tokyo
+    build:
+      context: db
+      dockerfile: ./Dockerfile
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db/conf.d:/etc/mysql/conf.d
+  react_app:
+    container_name: React
+    build:
+      context: __react__
+      dockerfile: Dockerfile
+    volumes:
+      - $SRC_REACT:/app:cached
+    entrypoint: sh
+    command: -c "yarn install && yarn start"
+    ports:
+      - "3000:3000"
